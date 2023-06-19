@@ -14,7 +14,7 @@ public class HelloWorld {
     static final Logger logger = LogManager.getLogger(HelloWorld.class);
 
     // Handler for GET request to the root URL ("/")
-    @GetMapping("/")
+    @GetMapping("/hello")
     public String home() {
         // Log a message indicating the request
         logger.info("Request received for /");

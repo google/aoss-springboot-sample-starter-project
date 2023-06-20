@@ -1,4 +1,4 @@
-# Heading 1 AOSS-SpringBoot-Sample-Starter-Project
+# AOSS-SpringBoot-Sample-Starter-Project
 
 ## Introduction
 This is a simple “Hello-World” SpringBoot application written in Java, which downloads the required and available packages from Assured OSS and the rest non-available packages from Maven Central Repository (open-source). The aim of this document is to define how to start working on sample starter projects using Assured OSS packages, which can help a user to quickly start using Assured OSS with minimal friction.
@@ -64,7 +64,49 @@ Replace the KEY value in the settings.xml file :
 </properties>
 ```
 
-4. Run the following install command where <project_path>/ .m2/settings.xml_path is the path of settings.xml file in the  .m2 directory of your project directory.
+4. Updating settings.xml file:
+
+If the settings file already exists in ~/. m2/  location for linux and ${user. home}/. m2 location for mac, user can directly update the settings.xml file.
+settings.xml
+
+```cmd
+<settings>
+  <servers>
+    <server>
+      <id>artifact-registry</id>
+      <configuration>
+        <httpConfiguration>
+          <get>
+            <usePreemptive>true</usePreemptive>
+          </get>
+          <head>
+            <usePreemptive>true</usePreemptive>
+          </head>
+          <put>
+            <params>
+              <property>
+                <name>http.protocol.expect-continue</name>
+                <value>false</value>
+              </property>
+            </params>
+          </put>
+        </httpConfiguration>
+      </configuration>
+      <username>_json_key_base64</username>
+      <password>{KEY}</password>
+    </server>
+  </servers>
+</settings>
+```
+Elsewise if the settings file is not present, users can use the <project_path>/.m2/settings.xml file provided.
+
+If you are updating the root directory settings file, run the following command :
+
+``cmd
+mvn -s settings.xml clean install
+```
+
+else run the following install command where .m2/settings.xml_path is the path of settings.xml file in  .m2 directory of your project directory.
 
 ```cmd
 mvn -s .m2/settings.xml_path clean install

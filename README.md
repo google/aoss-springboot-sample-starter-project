@@ -131,7 +131,7 @@ Replace the {KEY} value in the settings.xml file :
 
 Run the following command :
 
-``cmd
+```cmd
 mvn -s settings.xml clean install
 ```
 Refer to [Authenticate using password](https://cloud.google.com/assured-open-source-software/docs/download-java-packages#authenticate_using_password) for further information.

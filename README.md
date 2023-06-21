@@ -1,4 +1,4 @@
-# Heading 1 AOSS-SpringBoot-Sample-Starter-Project
+# AOSS-SpringBoot-Sample-Starter-Project
 
 ## Introduction
 This is a simple “Hello-World” SpringBoot application written in Java, which downloads the required and available packages from Assured OSS and the rest non-available packages from Maven Central Repository (open-source). The aim of this document is to define how to start working on sample starter projects using Assured OSS packages, which can help a user to quickly start using Assured OSS with minimal friction.
@@ -27,20 +27,30 @@ After cloning the project, User need to follow certain steps to get started with
 
 1. Setting up the Authentication via Service Key : 
 
-Users have to replace the KEY present in settings.xml file, with the base64-encoding of the entire service account JSON key file. To do this, execute following command:
+Prerequisites for setting up [Application Default Credentials](https://cloud.google.com/docs/authentication#adc), set up authentication first : 
+
+1. Generate and download the [service account key](https://cloud.google.com/iam/docs/keys-create-delete#creating).
+2. Revoke any existing auth by using the following command.
 
 ```cmd
-cat KEY_FILE_LOCATION | base64
+gcloud auth revoke
 ```
 
-Where KEY_FILE_LOCATION is the location of the service account JSON key file.
-
-Replace the KEY value in the settings.xml file : 
+3. Authenticate using the command:
 
 ```cmd
-<username>_json_key_base64</username>
-<password>{KEY}</password>
+gcloud auth login --cred-file=FILEPATH.json
 ```
+Where FILEPATH is the path to the service account key or the credential config file.
+
+4. Update Application Default Credentials using the following command:
+
+```cmd
+export GOOGLE_APPLICATION_CREDENTIALS=FILEPATH.json
+```
+Where FILEPATH is the path to the service account key.
+
+Refer to [set up authentication](https://cloud.google.com/assured-open-source-software/docs/validate-connection#set_up_authentication) for further information.
 
 2. The current pom.xml files contain packages required for the application to run, Users can add more packages by adding <dependency> tag to the file. Available packages will get downloaded from Asurred OSS and rest from open-source.
 
@@ -64,12 +74,67 @@ Replace the KEY value in the settings.xml file :
 </properties>
 ```
 
-4. Run the following install command where <project_path>/ .m2/settings.xml_path is the path of settings.xml file in the  .m2 directory of your project directory.
-
-```cmd
-mvn -s .m2/settings.xml_path clean install
-```
-
-All the required packages will get downloaded, and users can import it to start working with it. 
+4. All the required packages will get downloaded, and users can import it to start working with it. 
 You have the basic framework to start working with SpringBoot Application along with the Logging library, to see output which is “Hello,World”, open localhost:8080/hello.
 In case you get stuck in any process refer to [Download Java packages using direct repository access](https://cloud.google.com/assured-open-source-software/docs/download-java-packages#access_packages_not_available_in_assured_oss).
+
+
+## Additional Information
+
+Ideally it is preferred to use authentication via credential helper bu user can also authenticate via service key : 
+
+### Setting up authentication via service Key:
+
+Users have to replace the KEY present in settings.xml file, with the base64-encoding of the entire service account JSON key file. To do this, execute following command:
+
+```cmd
+cat KEY_FILE_LOCATION | base64
+```
+Where KEY_FILE_LOCATION is the location of the service account JSON key file.
+
+### Updating settings.xml file:
+
+If the settings file already exists in ~/. m2/  location for linux and ${user. home}/. m2 location for mac, user can directly update the settings.xml file, if not user has to create the settings.xml file
+
+Replace the {KEY} value in the settings.xml file :
+
+
+```cmd
+<settings>
+  <servers>
+    <server>
+      <id>artifact-registry</id>
+      <configuration>
+        <httpConfiguration>
+          <get>
+            <usePreemptive>true</usePreemptive>
+          </get>
+          <head>
+            <usePreemptive>true</usePreemptive>
+          </head>
+          <put>
+            <params>
+              <property>
+                <name>http.protocol.expect-continue</name>
+                <value>false</value>
+              </property>
+            </params>
+          </put>
+        </httpConfiguration>
+      </configuration>
+      <username>_json_key_base64</username>
+      <password>{KEY}</password>
+    </server>
+  </servers>
+</settings>
+```
+
+Run the following command :
+
+``cmd
+mvn -s settings.xml clean install
+```
+Refer to [Authenticate using password](https://cloud.google.com/assured-open-source-software/docs/download-java-packages#authenticate_using_password) for further information.
+
+
+

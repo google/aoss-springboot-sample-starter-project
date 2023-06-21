@@ -25,7 +25,7 @@ gcloud components update
 ## Steps to run the project :
 After cloning the project, User need to follow certain steps to get started with the project:
 
-1. Setting up the Authentication via Service Key : 
+1. Setting up the Authentication using Credential Helper : 
 
 Prerequisites for setting up [Application Default Credentials](https://cloud.google.com/docs/authentication#adc), set up authentication first : 
 
@@ -81,7 +81,7 @@ In case you get stuck in any process refer to [Download Java packages using dire
 
 ## Additional Information
 
-Ideally it is preferred to use authentication via credential helper but user can also authenticate via service key : 
+Ideally it is preferred to use authentication using credential helper but user can also authenticate using service key : 
 
 ### Setting up authentication via service Key:
 

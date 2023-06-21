@@ -81,7 +81,7 @@ In case you get stuck in any process refer to [Download Java packages using dire
 
 ## Additional Information
 
-Ideally it is preferred to use authentication via credential helper bu user can also authenticate via service key : 
+Ideally it is preferred to use authentication via credential helper but user can also authenticate via service key : 
 
 ### Setting up authentication via service Key:
 

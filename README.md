@@ -8,7 +8,7 @@ Users can refer to [Assured Open Source Software](https://cloud.google.com/assur
 Run the following command to clone the project in your local setup: 
 
 ```cmd
-git clone {Project link}
+git clone https://github.com/google/aoss-springboot-sample-starter-project.git
 ```
 
 ## Prerequisite : 

@@ -34,6 +34,6 @@ public class HelloWorld {
 
     public static void main(String[] args) {
         SpringApplication.run(HelloWorld.class, args);
-        logger.info("Welcome to aoss-sample-starter-project!");
+        logger.info("Welcome to AOSS-SpringBoot-Sample-Starter-Project!");
     }
 }

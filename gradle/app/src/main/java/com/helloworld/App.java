@@ -33,6 +33,6 @@ public class App {
 
     public static void main(String[] args) {
         SpringApplication.run(App.class, args);
-        logger.info("Application started");
+        logger.info("Welcome to AOSS-SpringBoot-Sample-Starter-Project!");
     }
 }

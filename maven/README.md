@@ -25,7 +25,7 @@ to download required packages
  
 3. In case user want to look at the report of what packages are downloaded from Assured OSS and Open Source as well, they can run generate_report.sh script after inserting path_to_service_account_key to execute the setup script
 
-``cmd
+```cmd
 chmod +x generate_report.sh
 ./generate_report.sh path_to_service_account_key
 ```

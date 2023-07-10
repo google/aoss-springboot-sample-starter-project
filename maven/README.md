@@ -2,9 +2,36 @@
 
 Follow the following steps if you are using Maven as build automation tool for your Java project.
 
-Remember to Set up the Authentication using Credential Helper mentioned in README.
+You should have Java and Maven downloaded and configured on your system. You can verify their installations by running java -version and mvn --version in the command prompt or terminal.
 
-After cloning the project follow the following steps to work on sample project:
+After cloning move to Maven folder and follow the steps mentioned below to start working on the project.
+
+## Steps to start working on project
+1. User should run setup.sh script before doing anything,in order to run and check the installation and authentication on their system. The script will guide them what went wrong and it is mandatory to run this before starting build tool. Run the following command after inserting path_to_service_account_key to execute the setup script:
+
+```cmd
+chmod +x setup.sh 
+./setup.sh path_to_service_account_key
+```
+Once the setup is completed it will say "Authentication successful, Proceed with mvn clean install"
+Refer to [set up authentication](https://cloud.google.com/assured-open-source-software/docs/validate-connection#set_up_authentication) for further information.
+
+2. After the setup is complete the user should run 
+
+```cmd
+mvn clean install
+```
+to download required packages
+ 
+3. In case user want to look at the report of what packages are downloaded from Assured OSS and Open Source as well, they can run generate_report.sh script after inserting path_to_service_account_key to execute the setup script
+
+``cmd
+chmod +x generate_report.sh
+./generate_report.sh path_to_service_account_key
+```
+The following report will be printed as report.txt
+
+## Steps to make changes and extend the project 
 
 1. The current pom.xml files contain packages required for the application to run, Users can add more packages by adding <dependency> tag to the file. Available packages will get downloaded from Asurred OSS and rest from open-source.
 
@@ -34,9 +61,6 @@ After cloning the project follow the following steps to work on sample project:
 mvn clean install
 ```
 
-```cmd
-javac HelloWorld.java
-```
 
 All the required packages will get downloaded, and users can import it to start working with it. 
 You have the basic framework to start working with SpringBoot Application along with the Logging library, to see output which is “Hello,World”, open localhost:8080/hello.

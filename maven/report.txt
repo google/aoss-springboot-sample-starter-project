@@ -1,7 +1,5 @@
 Number of packages coming from AOSS: 21
-
 Number of packages coming from the public repository: 48
-
 List of packages coming from AOSS:
 ----
 

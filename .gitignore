@@ -5,3 +5,4 @@ gradle/gradlew
 gradle/grdle.bat
 maven/target/
 maven/report
+maven/report.txt

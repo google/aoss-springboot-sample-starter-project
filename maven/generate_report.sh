@@ -14,56 +14,69 @@
 
 credentials_file="$1"
 export GOOGLE_APPLICATION_CREDENTIALS="$credentials_file"
+mvn dependency:list -DoutputFile=tempfile_output_mvn.txt
 
-mvn dependency:list -DoutputFile=report.txt
+# Convert maven dependencies 
+sed -i 's/:jar:/:/g' tempfile_output_mvn.txt
+sed -i 's/:compile//g' tempfile_output_mvn.txt
 
-sed -i 's/:jar:/:/g' report.txt
-sed -i 's/:compile//g' report.txt
-
-# Create a temporary file for editing
-tmp_file=$(mktemp)
-
-# Initialize arrays to store dependencies
-aoss_dependencies=()
-os_dependencies=()
-
-# create the URL
 while IFS= read -r dependency; do
     # Remove spaces from the dependency
-    dependency=${dependency// /}
+    dependency=$(echo "$dependency" | sed 's/^[[:space:]]*//' | sed 's/[[:space:]]*$//')
     # Check for valid URL
     if [[ ! $dependency =~ ^[^:]+:[^:]+:[^:]+$ ]]; then
         continue
     fi
-    # Construct the URL for the dependency
-    url="https://artifactregistry.googleapis.com/v1/projects/cloud-aoss/locations/us/repositories/cloud-aoss-java/mavenArtifacts/$dependency"
 
-    # Execute the curl command and capture the output
-    curl_output=$(curl -s -X GET -H "Authorization: Bearer $(gcloud auth application-default print-access-token)" "$url")
+    # Convert the dependency to URL format and store in report.txt
+    url_dependency=$(echo "$dependency" | sed 's/\(.*\)/"name": "projects\/cloud-aoss\/locations\/us\/repositories\/cloud-aoss-java\/mavenArtifacts\/\1",/')
+    echo "$url_dependency" >> tempfile_output_mvn.txt
 
-    # Check if the curl output contains the error message
-    if [[ $curl_output == *"\"status\": \"NOT_FOUND\""* ]]; then
-        os_dependencies+=("$dependency")
+done < tempfile_output_mvn.txt
+
+
+curl_output_first=$(curl -X GET -H "Authorization: Bearer "$(gcloud auth application-default print-access-token) \
+  "https://artifactregistry.googleapis.com/v1/projects/cloud-aoss/locations/us/repositories/cloud-aoss-java/mavenArtifacts?pageSize=2000" \
+  | grep name | sort -f)
+
+echo "$curl_output_first" >> tempfile_output_curl
+
+curl_output=$(curl -X GET -H "Authorization: Bearer "$(gcloud auth application-default print-access-token) \
+  "https://artifactregistry.googleapis.com/v1/projects/cloud-aoss/locations/us/repositories/cloud-aoss-java/mavenArtifacts")
+
+next_page_token=$(echo "$curl_output" | grep nextPageToken | awk '{print $2}' | sed 's/"//g')
+
+while [[ -n "$next_page_token" ]]; do
+    curl_output_token=$(curl -sS -X GET -H "Authorization: Bearer $(gcloud auth application-default print-access-token)" \
+        "https://artifactregistry.googleapis.com/v1/projects/cloud-aoss/locations/us/repositories/cloud-aoss-java/mavenArtifacts?pageSize=2000&pageToken=$next_page_token")
+    echo "$curl_output_token" | grep name | sort -f >> tempfile_output_curl
+    next_page_token=$(echo "$curl_output_token" | grep nextPageToken | awk '{print $2}' | sed 's/"//g')
+done
+
+aoss_count=0
+os_count=0
+aoss_packages=""
+os_packages=""
+
+# Check which files from report.txt are present in tempfile_output_curl
+while IFS= read -r file; do
+    if grep -q "$file" tempfile_output_curl; then
+        ((aoss_count++))
+        aoss_packages+="$(basename "$file" | awk -F'/' '{print $(NF-1)}')"$'\n'
     else
-        aoss_dependencies+=("$dependency")
+        ((os_count++))
     fi
-done < report.txt
-echo "Dependencies coming from Assured OSS : " >> "$tmp_file"
-echo >> "$tmp_file"
-# Append the AOSS dependencies to the temporary file
-for dependency in "${aoss_dependencies[@]}"; do
-    echo "$dependency" >> "$tmp_file"
-done
-echo >> "$tmp_file"
-echo "Dependencies coming from Open Source: " >> "$tmp_file"
-echo >> "$tmp_file"
-# Append the OS dependencies to the temporary file
-for dependency in "${os_dependencies[@]}"; do
-    echo "$dependency" >> "$tmp_file"
-done
+done < tempfile_output_mvn.txt
 
-# Overwrite the original report.txt file with the updated contents
-mv "$tmp_file" report.txt
+# Save the final result in report.txt
+echo "Number of packages coming from AOSS: $aoss_count" > report.txt
+echo "Number of packages coming from the public repository: $os_count" >> report.txt
+echo "List of packages coming from AOSS:" >> report.txt
+echo "----" >> report.txt
+echo "$aoss_packages" >> report.txt
 
+# Clean up by removing the temporary files
+rm tempfile_output_curl tempfile_output_mvn.txt
 
+# Use report.txt as the final output
 cat report.txt

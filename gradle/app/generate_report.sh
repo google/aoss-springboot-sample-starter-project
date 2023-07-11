@@ -11,52 +11,66 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 credentials_file="$1"
 export GOOGLE_APPLICATION_CREDENTIALS="$credentials_file"
 
-gradle dependencies --configuration compileClasspath > dependencies.txt
-
-
-# Variables to store dependencies from Assured OSS and Open Source
-aoss_dependencies=""
-os_dependencies=""
+gradle dependencies --configuration compileClasspath > tempfile_output_gradle.txt
 
 # Read each dependency from the file and generate the URL
 while IFS= read -r dependency; do
   # Check if the dependency starts with "+" or "|"
-  if [[ $dependency == [+\|]* ]]; then
+  if [[ $dependency == [+\|]* && $dependency != *'->'* ]]; then
     # Remove any spaces in the dependency
     dependency=${dependency// /}
 
     # Remove any special characters from the start of the dependency name
-    dependency=$(echo "$dependency" | sed 's/^[^[:alnum:]]*//')
-
-    # Construct the URL for the dependency
-    url="https://artifactregistry.googleapis.com/v1/projects/cloud-aoss/locations/us/repositories/cloud-aoss-java/mavenArtifacts/$dependency"
-
-    # Execute the cURL command and capture the output
-    curl_output=$(curl -s -X GET -H "Authorization: Bearer $(gcloud auth application-default print-access-token)" "$url")
-
-    # Check if the cURL output contains the error message
-    if [[ $curl_output == *"\"status\": \"NOT_FOUND\""* ]]; then
-      os_dependencies+="$dependency"$'\n'
-    else
-      aoss_dependencies+="$dependency"$'\n'
-    fi
+    dependency=$(echo "$dependency" | sed 's/^[^[:alnum:]]*//'| sed 's/\(.*\)/"name": "projects\/cloud-aoss\/locations\/us\/repositories\/cloud-aoss-java\/mavenArtifacts\/\1",/')
+    echo "$dependency" >> tempfile_output_gradle.txt
   fi
-done <dependencies.txt
+done <tempfile_output_gradle.txt
 
-# Create the report.txt file
-echo "Assured OSS Dependencies" > report.txt
-echo >> report.txt
-echo "$aoss_dependencies" >> report.txt
-echo "" >> report.txt
-echo "Open Source Dependencies" >> report.txt
-echo >> report.txt
-echo "$os_dependencies" >> report.txt
+url_output_first=$(curl -X GET -H "Authorization: Bearer "$(gcloud auth application-default print-access-token) \
+  "https://artifactregistry.googleapis.com/v1/projects/cloud-aoss/locations/us/repositories/cloud-aoss-java/mavenArtifacts?pageSize=2000" \
+  | grep name | sort -f)
 
-# Print the report
+echo "$curl_output_first" >> tempfile_output_curl
+
+curl_output=$(curl -X GET -H "Authorization: Bearer "$(gcloud auth application-default print-access-token) \
+  "https://artifactregistry.googleapis.com/v1/projects/cloud-aoss/locations/us/repositories/cloud-aoss-java/mavenArtifacts")
+
+next_page_token=$(echo "$curl_output" | grep nextPageToken | awk '{print $2}' | sed 's/"//g')
+
+while [[ -n "$next_page_token" ]]; do
+    curl_output_token=$(curl -sS -X GET -H "Authorization: Bearer $(gcloud auth application-default print-access-token)" \
+        "https://artifactregistry.googleapis.com/v1/projects/cloud-aoss/locations/us/repositories/cloud-aoss-java/mavenArtifacts?pageSize=2000&pageToken=$next_page_token")
+    echo "$curl_output_token" | grep name | sort -f >> tempfile_output_curl
+    next_page_token=$(echo "$curl_output_token" | grep nextPageToken | awk '{print $2}' | sed 's/"//g')
+done
+
+aoss_count=0
+os_count=0
+aoss_packages=""
+os_packages=""
+
+
+while IFS= read -r file; do
+    if grep -q "$file" tempfile_output_curl; then
+        ((aoss_count++))
+        aoss_packages+="$file"$'\n'
+    else
+        ((os_count++))
+    fi
+done <tempfile_output_gradle.txt
+# Save the final result in report.txt
+echo "Number of packages coming from AOSS: $aoss_count" > report.txt
+echo "Number of packages coming from the public repository: $os_count" >> report.txt
+echo "List of packages coming from AOSS:" >> report.txt
+echo "----" >> report.txt
+echo "$aoss_packages" >> report.txt
+
+# # Clean up by removing the temporary files
+rm tempfile_output_curl tempfile_output_gradle.txt
+
+# Use report.txt as the final output
 cat report.txt
-
-# Clean up by removing the temporary file
-rm dependencies.txt

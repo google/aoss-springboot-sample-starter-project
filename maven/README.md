@@ -29,7 +29,8 @@ to download required packages
 chmod +x generate_report.sh
 ./generate_report.sh path_to_service_account_key
 ```
-The following report will be printed as report.txt
+The following report will be printed as report.txt.
+
 For verification of package, build provenance and metadata, use [aoss-verifier](https://github.com/google/aoss-verifier)
 
 ## Steps to make changes and extend the project 

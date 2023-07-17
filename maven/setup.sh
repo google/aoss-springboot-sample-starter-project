@@ -12,41 +12,61 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Check if gcloud command is installed
-if ! command -v gcloud &> /dev/null; then
-  echo "gcloud is not installed. Please install it."
-  exit 1
-fi
+#!/bin/bash
+# Check if the provided credentials file exists
+check_credentials_file() {
+  local credentials_file="$1"
 
-# Check if credentials file path is provided as an argument
-if [ $# -eq 0 ]; then
-  echo "Please provide the path to the JSON credentials file."
-  exit 1
-fi
-
-# Retrieve the credentials file path from the command-line argument
-credentials_file="$1"
+  if [ ! -f "$credentials_file" ]; then
+    echo "Credentials file not found: $credentials_file"
+    exit 1
+  fi
+}
 
 # Run gcloud auth login with credentials file
-gcloud auth login --cred-file="$credentials_file"
+run_gcloud_auth_login() {
+  local credentials_file="$1"
+
+  gcloud auth login --cred-file="$credentials_file"
+}
+
 
 # Check the exit status of the gcloud auth login command
-if [ $? -eq 0 ]; then
-  echo "Authentication successful"
-  # Export GOOGLE_APPLICATION_CREDENTIALS environment variable
-  export GOOGLE_APPLICATION_CREDENTIALS="$credentials_file"
-  # Run curl command to get the response
-  access_token=$(gcloud auth application-default print-access-token)
-  response=$(curl -sS -X GET -H "Authorization: Bearer $access_token" \
-    "https://artifactregistry.googleapis.com/v1/projects/cloud-aoss/locations/us/repositories/cloud-aoss-java/mavenArtifacts?pageSize=2000")
-
-  # Check the exit status of the curl command
+check_gcloud_auth_status() {
   if [ $? -eq 0 ]; then
-    echo "Authentication Successful, proceed with mvn clean install"
+    echo "Authentication successful"
+    export GOOGLE_APPLICATION_CREDENTIALS="$credentials_file"
+    access_token=$(gcloud auth application-default print-access-token)
+    response=$(curl -sS -X GET -H "Authorization: Bearer $access_token" \
+      "https://artifactregistry.googleapis.com/v1/projects/cloud-aoss/locations/us/repositories/cloud-aoss-java/mavenArtifacts?pageSize=2000")
 
+    if [ $? -eq 0 ]; then
+      echo "Authentication Successful, proceed with build.py"
+    else
+      echo "Authentication failed"
+    fi
   else
     echo "Authentication failed"
   fi
-else
-  echo "Authentication failed"
-fi
+}
+
+main() {
+  
+  # Check if the credentials file path is provided
+  if [ $# -eq 0 ]; then
+    echo "Please provide the path to the JSON credentials file."
+    exit 1
+  fi
+
+  # Retrieve the credentials file path from the command-line argument
+  local credentials_file="$1"
+
+  check_credentials_file "$credentials_file"
+
+  run_gcloud_auth_login "$credentials_file"
+
+  check_gcloud_auth_status
+}
+
+
+main "$@"

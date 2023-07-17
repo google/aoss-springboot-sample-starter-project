@@ -122,4 +122,3 @@ local aoss_packages=""
 }
 
 main "$@"
-

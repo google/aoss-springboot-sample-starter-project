@@ -68,5 +68,4 @@ main() {
   check_gcloud_auth_status
 }
 
-
 main "$@"

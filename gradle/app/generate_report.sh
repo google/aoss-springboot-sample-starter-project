@@ -12,16 +12,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-credentials_file="$1"
-export GOOGLE_APPLICATION_CREDENTIALS="$credentials_file"
+#!/bin/bash
 
-gradle dependencies --configuration compileClasspath > tempfile_output_gradle.txt
+# Set the credentials file and export environment variable
+set_credentials() {
+  local credentials_file="$1"
+  export GOOGLE_APPLICATION_CREDENTIALS="$credentials_file"
+}
 
-# Read each dependency from the file and generate the URL
-while IFS= read -r dependency; do
-  # Check if the dependency starts with "+" or "|"
+# Generate the gradle dependencies list and store it in tempfile_output_gradle
+generate_gradle_dependencies() {
+  gradle dependencies --configuration compileClasspath > tempfile_output_gradle.txt
+
+}
+
+# Process gradle dependencies and update it according to curl output
+process_gradle_dependencies() {
+  while IFS= read -r dependency; do
   if [[ $dependency == [+\|]* && $dependency != *'->'* ]]; then
-    # Remove any spaces in the dependency
+   
     dependency=${dependency// /}
 
     # Remove any special characters from the start of the dependency name
@@ -29,48 +38,78 @@ while IFS= read -r dependency; do
     echo "$dependency" >> tempfile_output_gradle.txt
   fi
 done <tempfile_output_gradle.txt
+}
 
-url_output_first=$(curl -X GET -H "Authorization: Bearer "$(gcloud auth application-default print-access-token) \
-  "https://artifactregistry.googleapis.com/v1/projects/cloud-aoss/locations/us/repositories/cloud-aoss-java/mavenArtifacts?pageSize=2000" \
-  | grep name | sort -f)
+# Fetch cURL output and store it in tempfile_output_curl
+fetch_curl_output() {
+  local access_token=$(gcloud auth application-default print-access-token)
+  local url="https://artifactregistry.googleapis.com/v1/projects/cloud-aoss/locations/us/repositories/cloud-aoss-java/mavenArtifacts"
+  local next_page_token
 
-echo "$curl_output_first" >> tempfile_output_curl
+  curl_output_first=$(curl -X GET -H "Authorization: Bearer $access_token" "$url?pageSize=2000" | grep name | sort -f)
+  echo "$curl_output_first" >> tempfile_output_curl
 
-curl_output=$(curl -X GET -H "Authorization: Bearer "$(gcloud auth application-default print-access-token) \
-  "https://artifactregistry.googleapis.com/v1/projects/cloud-aoss/locations/us/repositories/cloud-aoss-java/mavenArtifacts")
+  curl_output=$(curl -X GET -H "Authorization: Bearer $access_token" "$url")
+  next_page_token=$(echo "$curl_output" | grep nextPageToken | awk '{print $2}' | sed 's/"//g')
 
-next_page_token=$(echo "$curl_output" | grep nextPageToken | awk '{print $2}' | sed 's/"//g')
-
-while [[ -n "$next_page_token" ]]; do
-    curl_output_token=$(curl -sS -X GET -H "Authorization: Bearer $(gcloud auth application-default print-access-token)" \
-        "https://artifactregistry.googleapis.com/v1/projects/cloud-aoss/locations/us/repositories/cloud-aoss-java/mavenArtifacts?pageSize=2000&pageToken=$next_page_token")
+  while [[ -n "$next_page_token" ]]; do
+    curl_output_token=$(curl -sS -X GET -H "Authorization: Bearer $access_token" "$url?pageSize=2000&pageToken=$next_page_token")
     echo "$curl_output_token" | grep name | sort -f >> tempfile_output_curl
     next_page_token=$(echo "$curl_output_token" | grep nextPageToken | awk '{print $2}' | sed 's/"//g')
-done
+  done
+}
 
-aoss_count=0
-os_count=0
-aoss_packages=""
-os_packages=""
+# Process packages and check which packages are present in tempfile_output_curl
+process_packages() {
 
-
-while IFS= read -r file; do
+  while IFS= read -r file; do
     if grep -q "$file" tempfile_output_curl; then
-        ((aoss_count++))
-        aoss_packages+="$file"$'\n'
+      ((aoss_count++))
+      aoss_packages+="$(basename "$file" | awk -F'/' '{print $(NF-1)}')"$'\n'
     else
-        ((os_count++))
+      ((public_repo_count++))
     fi
-done <tempfile_output_gradle.txt
+  done < tempfile_output_gradle.txt
+
+}
+
 # Save the final result in report.txt
-echo "Number of packages coming from AOSS: $aoss_count" > report.txt
-echo "Number of packages coming from the public repository: $os_count" >> report.txt
-echo "List of packages coming from AOSS:" >> report.txt
-echo "----" >> report.txt
-echo "$aoss_packages" >> report.txt
+save_report() {
+    cat <<EOF > report.txt
+Number of packages coming from AOSS: $aoss_count
+Number of packages coming from the public repository: $public_repo_count
+List of packages coming from AOSS:
+ 
+$aoss_packages
 
-# # Clean up by removing the temporary files
-rm tempfile_output_curl tempfile_output_gradle.txt
+EOF
 
-# Use report.txt as the final output
-cat report.txt
+}
+
+# Perform cleanup by removing the temporary files
+cleanup() {
+  rm tempfile_output_curl tempfile_output_gradle.txt
+}
+
+# Main script execution
+main() {
+  local credentials_file="$1"
+
+  set_credentials "$credentials_file"
+  generate_gradle_dependencies
+  process_gradle_dependencies
+  fetch_curl_output
+
+local aoss_count=0
+local public_repo_count=0
+local aoss_packages=""
+
+  process_packages
+  save_report
+
+  cat report.txt
+
+  cleanup
+}
+
+main "$@"

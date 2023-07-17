@@ -31,6 +31,8 @@ chmod +x generate_report.sh
 ```
 The following report will be printed as report.txt
 
+For verification of package, build provenance and metadata, use [aoss-verifier](https://github.com/google/aoss-verifier)
+
 ## Steps to make changes and extend the project 
 1. The current build.gradle files contain packages required for the application to run, Users can add more packages by adding libraries under dependencies{} tag to the file. Available packages will get downloaded from Asurred OSS and rest from open-source.
 

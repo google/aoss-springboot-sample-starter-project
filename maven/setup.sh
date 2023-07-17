@@ -41,7 +41,7 @@ check_gcloud_auth_status() {
       "https://artifactregistry.googleapis.com/v1/projects/cloud-aoss/locations/us/repositories/cloud-aoss-java/mavenArtifacts?pageSize=2000")
 
     if [ $? -eq 0 ]; then
-      echo "Authentication Successful, proceed with build.py"
+      echo "Authentication Successful, proceed with mvn clean install"
     else
       echo "Authentication failed"
     fi

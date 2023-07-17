@@ -116,8 +116,6 @@ local aoss_packages=""
   process_packages
   save_report
 
-  
-
   cat report.txt
 
   cleanup

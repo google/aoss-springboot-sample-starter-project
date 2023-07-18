@@ -2,7 +2,7 @@
 
 Follow the following steps if you are using Maven as build automation tool for your Java project.
 
-You should have Java and Maven downloaded and configured on your system. You can verify their installations by running java -version and mvn --version in the command prompt or terminal.
+You should have Java and Maven downloaded and configured on your system. You can verify their installations by running java --version and mvn --version in the command prompt or terminal.
 
 After cloning move to Maven folder and follow the steps mentioned below to start working on the project.
 

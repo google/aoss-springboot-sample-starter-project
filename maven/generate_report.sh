@@ -32,7 +32,7 @@ convert_maven_dependencies() {
   sed -i 's/:compile//g' tempfile_output_mvn.txt
 }
 
-# Process maven dependencies and check which packages are present in tempfile_output_curl
+# Process maven dependencies and update it according to curl output
 process_maven_dependencies() {
   while IFS= read -r dependency; do
     # Remove spaces from the dependency
@@ -74,7 +74,11 @@ process_packages() {
   while IFS= read -r file; do
     if grep -q "$file" tempfile_output_curl; then
       ((aoss_count++))
-      aoss_packages+="$(basename "$file" | awk -F'/' '{print $(NF-1)}')"$'\n'
+       aoss_packages+="$(echo "$file" | awk -F'/' '{print substr($NF, 1, length($NF)-2)}')"$'\n'
+
+
+
+
     else
       ((public_repo_count++))
     fi

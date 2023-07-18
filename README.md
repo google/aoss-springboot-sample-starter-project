@@ -49,4 +49,4 @@ Where FILEPATH is the path to the service account key.
 
 Refer to [set up authentication](https://cloud.google.com/assured-open-source-software/docs/validate-connection#set_up_authentication) for further information.
 
-According to the build automation tool the user can choose between maven or gradle, and can refer to the respective README of the particular folder for futher modifaction and details to run the sample project
+According to the build automation tool the user can choose between maven or gradle, and can refer to the respective README of the particular folder for further modification and details to run the sample project

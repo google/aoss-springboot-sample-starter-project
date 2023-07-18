@@ -65,7 +65,7 @@ process_packages() {
   while IFS= read -r file; do
     if grep -q "$file" tempfile_output_curl; then
       ((aoss_count++))
-      aoss_packages+="$(basename "$file" | awk -F'/' '{print $(NF-1)}')"$'\n'
+      aoss_packages+="$(echo "$file" | awk -F'/' '{print substr($NF, 1, length($NF)-2)}')"$'\n'
     else
       ((public_repo_count++))
     fi

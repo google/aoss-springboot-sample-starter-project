@@ -75,10 +75,6 @@ process_packages() {
     if grep -q "$file" tempfile_output_curl; then
       ((aoss_count++))
        aoss_packages+="$(echo "$file" | awk -F'/' '{print substr($NF, 1, length($NF)-2)}')"$'\n'
-
-
-
-
     else
       ((public_repo_count++))
     fi

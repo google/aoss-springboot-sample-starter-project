@@ -7,13 +7,15 @@ You should have Java and Maven downloaded and configured on your system. You can
 After cloning move to Maven folder and follow the steps mentioned below to start working on the project.
 
 ## Steps to start working on project
-1. User should run setup.sh script before doing anything,in order to run and check the installation and authentication on their system. The script will guide them what went wrong and it is mandatory to run this before starting build tool. Run the following command after inserting path_to_service_account_key to execute the setup script:
+1. User should run setup.sh script before doing anything,in order to run and check the installation and authentication on their system. The script will guide them what went wrong and it is mandatory to run this before starting build tool. 
+
+Run the following command after inserting path_to_service_account_key to execute the setup script:
 
 ```cmd
 chmod +x setup.sh 
 ./setup.sh path_to_service_account_key
 ```
-Once the setup is completed it will say "Authentication successful, Proceed with mvn clean install"
+Once the setup is completed it will say "Authentication successful, Proceed with mvn clean install".
 Refer to [set up authentication](https://cloud.google.com/assured-open-source-software/docs/validate-connection#set_up_authentication) for further information.
 
 2. After the setup is complete the user should run 
@@ -29,13 +31,13 @@ to download required packages
 chmod +x generate_report.sh
 ./generate_report.sh path_to_service_account_key
 ```
-The following report will be printed as report.txt.
+The following report will be stored as report.txt in the root directory.
 
 For verification of package, build provenance and metadata, use [aoss-verifier](https://github.com/google/aoss-verifier)
 
 ## Steps to make changes and extend the project 
 
-1. The current pom.xml files contain packages required for the application to run, Users can add more packages by adding <dependency> tag to the file. Available packages will get downloaded from Asurred OSS and rest from open-source.
+1. The current pom.xml files contain packages required for the application to run, Users can add more packages by adding dependency tag to the file. Available packages will get downloaded from Asurred OSS and rest from open-source.
 
 ```cmd
 <dependencies>

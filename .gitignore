@@ -1,7 +1,3 @@
 .vscode/
-gradle/.gradle
-gradle/app/build/
-gradle/gradlew
-gradle/grdle.bat
 maven/target/
 maven/report.txt

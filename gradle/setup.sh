@@ -13,7 +13,7 @@
 # limitations under the License.
 
 #!/bin/bash
-# Check if the provided credentials file exists
+
 check_credentials_file() {
   local credentials_file="$1"
 

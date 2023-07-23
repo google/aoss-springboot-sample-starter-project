@@ -91,7 +91,6 @@ cleanup() {
   rm tempfile_output_curl tempfile_output_gradle.txt
 }
 
-# Main script execution
 main() {
   local credentials_file="$1"
 
@@ -100,15 +99,13 @@ main() {
   process_gradle_dependencies
   fetch_curl_output
 
-local aoss_count=0
-local public_repo_count=0
-local aoss_packages=""
+  local aoss_count=0
+  local public_repo_count=0
+  local aoss_packages=""
 
   process_packages
   save_report
-
   cat report.txt
-
   cleanup
 }
 

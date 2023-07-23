@@ -74,7 +74,7 @@ process_packages() {
   while IFS= read -r file; do
     if grep -q "$file" tempfile_output_curl; then
       ((aoss_count++))
-       aoss_packages+="$(echo "$file" | awk -F'/' '{print substr($NF, 1, length($NF)-2)}')"$'\n'
+      aoss_packages+="$(echo "$file" | awk -F'/' '{print substr($NF, 1, length($NF)-2)}')"$'\n'
     else
       ((public_repo_count++))
     fi
@@ -109,15 +109,13 @@ main() {
   process_maven_dependencies
   fetch_curl_output
 
-local aoss_count=0
-local public_repo_count=0
-local aoss_packages=""
+  local aoss_count=0
+  local public_repo_count=0
+  local aoss_packages=""
 
   process_packages
   save_report
-
   cat report.txt
-
   cleanup
 }
 

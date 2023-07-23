@@ -13,7 +13,7 @@
 # limitations under the License.
 
 #!/bin/bash
-# Check if the provided credentials file exists
+
 check_credentials_file() {
   local credentials_file="$1"
 
@@ -29,7 +29,6 @@ run_gcloud_auth_login() {
 
   gcloud auth login --cred-file="$credentials_file"
 }
-
 
 # Check the exit status of the gcloud auth login command
 check_gcloud_auth_status() {

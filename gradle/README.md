@@ -29,7 +29,7 @@ to download required packages
 
 ```cmd
 chmod +x generate_report.sh
-./generate_report.sh path_to_service_account_key
+sudo ./generate_report.sh path_to_service_account_key
 ```
 The following report will be stored as report.txt in the root directory.
 

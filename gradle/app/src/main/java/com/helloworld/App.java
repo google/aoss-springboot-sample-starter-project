@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-
 package com.helloworld;
 
 import org.springframework.boot.SpringApplication;
@@ -24,8 +23,8 @@ import org.apache.logging.log4j.Logger;
 
 @RestController
 @SpringBootApplication
-public class HelloWorld {
-    static final Logger logger = LogManager.getLogger(HelloWorld.class);
+public class App {
+    static final Logger logger = LogManager.getLogger(App.class);
 
     @GetMapping("/hello") 
     public String home() {
@@ -33,7 +32,7 @@ public class HelloWorld {
     }
 
     public static void main(String[] args) {
-        SpringApplication.run(HelloWorld.class, args);
+        SpringApplication.run(App.class, args);
         logger.info("Welcome to AOSS-SpringBoot-Sample-Starter-Project!");
     }
 }

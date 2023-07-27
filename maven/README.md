@@ -13,7 +13,7 @@ Run the following command after inserting path_to_service_account_key to execute
 
 ```cmd
 chmod +x setup.sh 
-./setup.sh path_to_service_account_key
+sudo ./setup.sh path_to_service_account_key
 ```
 Once the setup is completed it will say "Authentication successful, Proceed with mvn clean install".
 Refer to [set up authentication](https://cloud.google.com/assured-open-source-software/docs/validate-connection#set_up_authentication) for further information.

@@ -3,6 +3,5 @@ gradle/.gradle
 gradle/app/build/
 gradle/gradlew
 gradle/grdle.bat
-gradle/app/report.txt
 maven/target/
 maven/report.txt

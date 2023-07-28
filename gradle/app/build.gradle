@@ -24,8 +24,7 @@ plugins {
 repositories {
     maven {
         url "artifactregistry://us-maven.pkg.dev/cloud-aoss/java"
-    }
-    
+    }   
 }
 
 dependencies {

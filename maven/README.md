@@ -43,7 +43,9 @@ For verification of package, build provenance and metadata, use [aoss-verifier](
 <dependencies>
 
     <dependency>
-      
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-api</artifactId>
+      <version>2.17.1</version>
     </dependency>
 	
   </dependencies>

@@ -4,3 +4,4 @@ gradle/app/build/
 gradle/grdle.bat
 maven/target/
 maven/report.txt
+gradle/app/bin/
